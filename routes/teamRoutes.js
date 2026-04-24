@@ -1,20 +1,13 @@
 const express = require("express");
-const router = express.Router();
-const Team = require("../models/Team");
+const router  = express.Router();
+const c       = require("../controllers/teamController");
 
-router.post("/create-team", async (req, res) => {
-    try {
-        const team = new Team(req.body);
-        await team.save();
-        res.status(201).json(team);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-router.get("/teams", async (req, res) => {
-    const teams = await Team.find();
-    res.json(teams);
-});
+router.post  ("/teams",                         c.createTeam);
+router.get   ("/teams",                         c.getAllTeams);
+router.get   ("/teams/:id",                     c.getTeamById);
+router.patch ("/teams/:id/status",              c.updateTeamStatus);
+router.post  ("/teams/:id/players",             c.addPlayer);
+router.delete("/teams/:id/players/:playerId",   c.removePlayer);
+router.delete("/teams/:id",                     c.deleteTeam);
 
 module.exports = router;

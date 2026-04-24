@@ -1,9 +1,15 @@
 const mongoose = require("mongoose");
 
-const TeamSchema = new mongoose.Schema({
-    name: String,
-    sport: String,
-    players: Number
+const playerSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    jerseyNo: { type: Number, required: true }
 });
 
-module.exports = mongoose.model("Team", TeamSchema);
+const teamSchema = new mongoose.Schema({
+    sportName: { type: String, required: true },
+    teamName: { type: String, required: true },
+    captain: { type: String, required: true },
+    players: { type: [playerSchema], default: [] }
+});
+
+module.exports = mongoose.model("Team", teamSchema);
