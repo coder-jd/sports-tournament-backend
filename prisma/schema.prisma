@@ -92,3 +92,18 @@ enum MatchStatus {
   COMPLETED
   CANCELLED
 }
+model User {
+  id        String   @id @default(uuid())
+  uid       String   @unique
+  email     String   @unique
+  name      String
+  avatar    String   @default("")
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  CAPTAIN
+  STUDENT
+}
