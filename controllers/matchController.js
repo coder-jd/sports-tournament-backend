@@ -44,11 +44,60 @@ async function advanceBracket(completedMatch, winnerId) {
   try {
     const { sportId, round } = completedMatch;
 
-    // Get all matches in current round
     const roundMatches = await prisma.match.findMany({
       where: { sportId, round },
       orderBy: { createdAt: "asc" },
     });
+
+    const updatedMatches = roundMatches.map(m =>
+      m.id === completedMatch.id ? { ...m, status: "COMPLETED", winnerId } : m
+    );
+
+    const allCompleted = updatedMatches.every(m => m.status === "COMPLETED");
+    if (!allCompleted) {
+      console.log(`⏳ Waiting for all ${round} matches to complete`);
+      return;
+    }
+
+    const winners = updatedMatches.map(m => m.winnerId).filter(Boolean);
+    console.log(`🏆 ${round} done. Winners: ${winners.length}`);
+
+    if (winners.length < 2) return;
+
+    const nextRound = getNextRound(round, winners.length);
+    if (!nextRound) {
+      console.log("🎉 Tournament is over!");
+      return;
+    }
+
+    const existing = await prisma.match.findFirst({
+      where: { sportId, round: nextRound }
+    });
+    if (existing) {
+      console.log(`⚠️ ${nextRound} already exists`);
+      return;
+    }
+
+    const nextMatches = [];
+    for (let i = 0; i < winners.length - 1; i += 2) {
+      nextMatches.push({
+        sportId,
+        teamAId: winners[i],
+        teamBId: winners[i + 1],
+        date: getNextDate(),
+        time: "10:00",
+        venue: completedMatch.venue || "Main Ground",
+        round: nextRound,
+        status: "UPCOMING",
+      });
+    }
+
+    await prisma.match.createMany({ data: nextMatches });
+    console.log(`✅ Created ${nextMatches.length} matches for ${nextRound}`);
+  } catch (err) {
+    console.error("Bracket progression error:", err.message);
+  }
+}
 
     // Check if all matches in this round are completed
     const allCompleted = roundMatches.every(m =>
@@ -107,7 +156,6 @@ function getNextRound(currentRound, winnerCount) {
   if (currentRound === "Final") return null; // Tournament over!
   return null;
 }
-
 function getNextDate() {
   const d = new Date();
   d.setDate(d.getDate() + 1);
