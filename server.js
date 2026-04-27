@@ -1,6 +1,7 @@
 const express = require("express");
 const cors    = require("cors");
 
+
 const app = express();
 
 app.use(cors());
@@ -11,6 +12,7 @@ app.use("/api", require("./routes/sportRoutes"));
 app.use("/api", require("./routes/teamRoutes"));
 app.use("/api", require("./routes/matchRoutes"));
 app.use("/api", require("./routes/authRoutes"));
+app.use("/api", require("./routes/announcementRoutes"));
 
 // ─── HEALTH CHECK ────────────────────────────────────────
 app.get("/", (_req, res) => {

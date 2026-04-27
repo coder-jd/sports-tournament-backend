@@ -107,3 +107,11 @@ enum Role {
   CAPTAIN
   STUDENT
 }
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  important Boolean  @default(false)
+  createdBy String
+  createdAt DateTime @default(now())
+}
