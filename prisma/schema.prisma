@@ -5,16 +5,38 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+// ─── TOURNAMENT ──────────────────────────────────────────
+model Tournament {
+  id          String           @id @default(uuid())
+  name        String
+  year        String
+  description String?
+  startDate   String
+  endDate     String
+  status      TournamentStatus @default(UPCOMING)
+  sports      Sport[]
+  createdAt   DateTime         @default(now())
+}
+
+enum TournamentStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+}
+
 // ─── SPORT ───────────────────────────────────────────────
 model Sport {
-  id       String @id @default(uuid())
-  name     String @unique   // e.g. "Cricket", "Football"
-  format   Format @default(KNOCKOUT)
+  id           String      @id @default(uuid())
+  name         String
+  format       Format      @default(KNOCKOUT)
+  tournamentId String?
+  tournament   Tournament? @relation(fields: [tournamentId], references: [id])
+  teams        Team[]
+  matches      Match[]
+  createdAt    DateTime    @default(now())
 
-  teams    Team[]
-  matches  Match[]
-
-  createdAt DateTime @default(now())
+  @@unique([tournamentId, name])
 }
 
 enum Format {
@@ -25,20 +47,17 @@ enum Format {
 
 // ─── TEAM ────────────────────────────────────────────────
 model Team {
-  id         String   @id @default(uuid())
+  id         String     @id @default(uuid())
   sportId    String
-  sport      Sport    @relation(fields: [sportId], references: [id])
+  sport      Sport      @relation(fields: [sportId], references: [id])
   teamName   String
   department String
   captain    String
   status     TeamStatus @default(PENDING)
-
   players    Player[]
-
   teamA_matches Match[] @relation("TeamA")
   teamB_matches Match[] @relation("TeamB")
-
-  createdAt  DateTime @default(now())
+  createdAt  DateTime   @default(now())
 
   @@unique([sportId, teamName])
 }
@@ -51,39 +70,33 @@ enum TeamStatus {
 
 // ─── PLAYER ──────────────────────────────────────────────
 model Player {
-  id        String  @id @default(uuid())
-  name      String
-  jerseyNo  Int
-  teamId    String
-  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  name     String
+  jerseyNo Int
+  teamId   String
+  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   @@unique([teamId, jerseyNo])
 }
 
 // ─── MATCH ───────────────────────────────────────────────
 model Match {
-  id         String      @id @default(uuid())
-  sportId    String
-  sport      Sport       @relation(fields: [sportId], references: [id])
-
-  teamAId    String
-  teamA      Team        @relation("TeamA", fields: [teamAId], references: [id])
-
-  teamBId    String
-  teamB      Team        @relation("TeamB", fields: [teamBId], references: [id])
-
-  date       String
-  time       String
-  venue      String
-
-  scoreA     Int         @default(0)
-  scoreB     Int         @default(0)
-
-  status     MatchStatus @default(UPCOMING)
-  round      String?     // e.g. "Quarterfinal", "Group Stage Day 2"
-  winnerId   String?     // teamId of winner (null if draw or not played)
-
-  createdAt  DateTime    @default(now())
+  id       String      @id @default(uuid())
+  sportId  String
+  sport    Sport       @relation(fields: [sportId], references: [id])
+  teamAId  String
+  teamA    Team        @relation("TeamA", fields: [teamAId], references: [id])
+  teamBId  String
+  teamB    Team        @relation("TeamB", fields: [teamBId], references: [id])
+  date     String
+  time     String
+  venue    String
+  scoreA   Int         @default(0)
+  scoreB   Int         @default(0)
+  status   MatchStatus @default(UPCOMING)
+  round    String?
+  winnerId String?
+  createdAt DateTime   @default(now())
 }
 
 enum MatchStatus {
@@ -92,6 +105,8 @@ enum MatchStatus {
   COMPLETED
   CANCELLED
 }
+
+// ─── USER ────────────────────────────────────────────────
 model User {
   id        String   @id @default(uuid())
   uid       String   @unique
@@ -107,6 +122,8 @@ enum Role {
   CAPTAIN
   STUDENT
 }
+
+// ─── ANNOUNCEMENT ────────────────────────────────────────
 model Announcement {
   id        String   @id @default(uuid())
   title     String

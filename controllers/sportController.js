@@ -3,16 +3,20 @@ const prisma = require("../prismaClient");
 // POST /sports  — create a sport
 exports.createSport = async (req, res) => {
   try {
-    const { name, format } = req.body;
+    const { name, format, tournamentId } = req.body;
     if (!name) return res.status(400).json({ error: "Sport name is required" });
 
     const sport = await prisma.sport.create({
-      data: { name: name.trim(), format: format || "KNOCKOUT" },
+      data: {
+        name: name.trim(),
+        format: format || "KNOCKOUT",
+        tournamentId: tournamentId || null,
+      },
     });
     res.status(201).json(sport);
   } catch (err) {
     if (err.code === "P2002")
-      return res.status(400).json({ error: "Sport already exists" });
+      return res.status(400).json({ error: "Sport already exists in this tournament" });
     res.status(500).json({ error: err.message });
   }
 };

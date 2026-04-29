@@ -13,6 +13,7 @@ app.use("/api", require("./routes/teamRoutes"));
 app.use("/api", require("./routes/matchRoutes"));
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/announcementRoutes"));
+app.use("/api", require("./routes/tournamentRoutes"));
 
 // ─── HEALTH CHECK ────────────────────────────────────────
 app.get("/", (_req, res) => {
