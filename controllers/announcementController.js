@@ -1,4 +1,5 @@
 const prisma = require("../prismaClient");
+const { sendNotification } = require("./notificationController");
 
 exports.getAnnouncements = async (_req, res) => {
   try {
@@ -25,6 +26,10 @@ exports.createAnnouncement = async (req, res) => {
         createdBy: req.user.email,
       },
     });
+
+    // Send push notification
+    await sendNotification(`📢 ${announcement.title}`, announcement.message);
+
     res.status(201).json(announcement);
   } catch (err) {
     res.status(500).json({ error: err.message });

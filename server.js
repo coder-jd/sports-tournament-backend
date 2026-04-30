@@ -14,6 +14,7 @@ app.use("/api", require("./routes/matchRoutes"));
 app.use("/api", require("./routes/authRoutes"));
 app.use("/api", require("./routes/announcementRoutes"));
 app.use("/api", require("./routes/tournamentRoutes"));
+app.use("/api", require("./routes/notificationRoutes"));
 
 // ─── HEALTH CHECK ────────────────────────────────────────
 app.get("/", (_req, res) => {

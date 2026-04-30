@@ -1,3 +1,4 @@
+const { sendNotification } = require("./notificationController");
 const prisma = require("../prismaClient");
 
 // ─── HELPERS ─────────────────────────────────────────────
@@ -274,6 +275,17 @@ exports.updateMatchScore = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+if (updateData.status === "LIVE") {
+  await sendNotification(
+    "🔴 Match Live!",
+    `${updated.teamA?.teamName} vs ${updated.teamB?.teamName} is now live!`
+  );
+}
+if (updateData.status === "COMPLETED") {
+  const winner = updateData.winnerId === updated.teamAId ? updated.teamA?.teamName : updated.teamB?.teamName;
+  if (winner) await sendNotification("🏆 Match Result!", `${winner} wins!`);
+}
 
 // ─── GET /standings/:sportId ──────────────────────────────
 exports.getStandings = async (req, res) => {
