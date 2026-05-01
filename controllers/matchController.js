@@ -270,13 +270,25 @@ exports.updateMatchScore = async (req, res) => {
       await advanceBracket(match, updateData.winnerId);
     }
 
+    // ✅ Notifications inside the function
+    if (updateData.status === "LIVE") {
+      await sendNotification(
+        "🔴 Match Live!",
+        `${updated.teamA?.teamName} vs ${updated.teamB?.teamName} is now live!`
+      );
+    }
+    if (updateData.status === "COMPLETED") {
+      const winner = updateData.winnerId === updated.teamAId
+        ? updated.teamA?.teamName
+        : updated.teamB?.teamName;
+      if (winner) await sendNotification("🏆 Match Result!", `${winner} wins!`);
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-
-if (updateData.status === "LIVE") {
   await sendNotification(
     "🔴 Match Live!",
     `${updated.teamA?.teamName} vs ${updated.teamB?.teamName} is now live!`

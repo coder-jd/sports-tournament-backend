@@ -1,46 +1,36 @@
 const prisma = require("../prismaClient");
-const { sendNotification } = require("./notificationController");
+const admin  = require("../firebaseAdmin");
 
-exports.getAnnouncements = async (_req, res) => {
+exports.saveToken = async (req, res) => {
   try {
-    const announcements = await prisma.announcement.findMany({
-      orderBy: { createdAt: "desc" },
+    const { token } = req.body;
+    if (!token) return res.status(400).json({ error: "Token required" });
+
+    await prisma.notificationToken.upsert({
+      where: { token },
+      update: { updatedAt: new Date() },
+      create: { token, userId: req.user?.uid || "anonymous" },
     });
-    res.json(announcements);
+    res.json({ message: "Token saved" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-exports.createAnnouncement = async (req, res) => {
+exports.sendNotification = async (title, body) => {
   try {
-    const { title, message, important } = req.body;
-    if (!title || !message)
-      return res.status(400).json({ error: "Title and message are required" });
+    const tokens = await prisma.notificationToken.findMany();
+    if (tokens.length === 0) return;
 
-    const announcement = await prisma.announcement.create({
-      data: {
-        title,
-        message,
-        important: important || false,
-        createdBy: req.user.email,
-      },
-    });
+    const tokenList = tokens.map(t => t.token);
+    const message = {
+      notification: { title, body },
+      tokens: tokenList,
+    };
 
-    // Send push notification
-    await sendNotification(`📢 ${announcement.title}`, announcement.message);
-
-    res.status(201).json(announcement);
+    const response = await admin.messaging().sendEachForMulticast(message);
+    console.log(`✅ Notification sent to ${response.successCount} devices`);
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-exports.deleteAnnouncement = async (req, res) => {
-  try {
-    await prisma.announcement.delete({ where: { id: req.params.id } });
-    res.json({ message: "Announcement deleted" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Notification error:", err.message);
   }
 };
