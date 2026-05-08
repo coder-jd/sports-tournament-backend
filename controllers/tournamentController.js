@@ -1,6 +1,5 @@
 const prisma = require("../prismaClient");
 
-// GET /tournaments
 exports.getAllTournaments = async (_req, res) => {
   try {
     const tournaments = await prisma.tournament.findMany({
@@ -19,7 +18,6 @@ exports.getAllTournaments = async (_req, res) => {
   }
 };
 
-// GET /tournaments/:id
 exports.getTournamentById = async (req, res) => {
   try {
     const tournament = await prisma.tournament.findUnique({
@@ -39,13 +37,11 @@ exports.getTournamentById = async (req, res) => {
   }
 };
 
-// POST /tournaments
 exports.createTournament = async (req, res) => {
   try {
     const { name, year, description, startDate, endDate, status } = req.body;
     if (!name || !year || !startDate || !endDate)
       return res.status(400).json({ error: "name, year, startDate, endDate are required" });
-
     const tournament = await prisma.tournament.create({
       data: { name, year, description, startDate, endDate, status: status || "UPCOMING" },
     });
@@ -55,7 +51,6 @@ exports.createTournament = async (req, res) => {
   }
 };
 
-// PATCH /tournaments/:id
 exports.updateTournament = async (req, res) => {
   try {
     const tournament = await prisma.tournament.update({
@@ -68,7 +63,6 @@ exports.updateTournament = async (req, res) => {
   }
 };
 
-// DELETE /tournaments/:id
 exports.deleteTournament = async (req, res) => {
   try {
     await prisma.tournament.delete({ where: { id: req.params.id } });
