@@ -70,11 +70,12 @@ enum TeamStatus {
 
 // ─── PLAYER ──────────────────────────────────────────────
 model Player {
-  id       String @id @default(uuid())
-  name     String
-  jerseyNo Int
-  teamId   String
-  team     Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  name      String
+  jerseyNo  Int
+  teamId    String
+  team      Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  cricketStats CricketStat[]
 
   @@unique([teamId, jerseyNo])
 }
@@ -131,4 +132,33 @@ model Announcement {
   important Boolean  @default(false)
   createdBy String
   createdAt DateTime @default(now())
+}
+// ─── CRICKET STATS ───────────────────────────────────────
+model CricketStat {
+  id        String  @id @default(uuid())
+  matchId   String
+  playerId  String
+  teamId    String
+  player    Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  // Batting
+  runs          Int     @default(0)
+  balls         Int     @default(0)
+  fours         Int     @default(0)
+  sixes         Int     @default(0)
+  dismissalType String? // Bowled, Caught, LBW, Run Out, Stumped, Not Out
+
+  // Bowling
+  overs         String? // e.g. "4.2"
+  maidens       Int     @default(0)
+  runsGiven     Int     @default(0)
+  wickets       Int     @default(0)
+
+  // Fielding
+  catches       Int     @default(0)
+  runOuts       Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([matchId, playerId])
 }
