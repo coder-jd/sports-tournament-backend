@@ -53,9 +53,12 @@ exports.createTournament = async (req, res) => {
 
 exports.updateTournament = async (req, res) => {
   try {
+    const allowed = ["name", "year", "description", "startDate", "endDate", "status"];
+    const data = {};
+    allowed.forEach(k => { if (req.body[k] !== undefined) data[k] = req.body[k]; });
     const tournament = await prisma.tournament.update({
       where: { id: req.params.id },
-      data: req.body,
+      data,
     });
     res.json(tournament);
   } catch (err) {
