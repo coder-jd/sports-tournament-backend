@@ -5,8 +5,8 @@ exports.createTeam = async (req, res) => {
   try {
     const { sportId, teamName, department, captain, players = [] } = req.body;
 
-    if (!sportId || !teamName || !department || !captain)
-      return res.status(400).json({ error: "sportId, teamName, department, captain are required" });
+    if (!sportId || !teamName || !captain)
+      return res.status(400).json({ error: "sportId, teamName, captain are required" });
 
     // Check sport exists
     const sport = await prisma.sport.findUnique({ where: { id: sportId } });

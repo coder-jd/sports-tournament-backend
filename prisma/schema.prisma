@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ─── TOURNAMENT ──────────────────────────────────────────
@@ -51,7 +52,7 @@ model Team {
   sportId    String
   sport      Sport      @relation(fields: [sportId], references: [id])
   teamName   String
-  department String
+  department String?
   captain    String
   status     TeamStatus @default(PENDING)
   players    Player[]
